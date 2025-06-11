@@ -12,6 +12,7 @@ A WebSocket server for Adaptive Cards with HTTP API. This server allows Kiosk di
   - Split-Screen template for side-by-side content
 - Support for multiple content types:
   - Markdown with custom styling
+  - HTML with secure rendering
   - Adaptive Cards with interactive elements
   - Images with various display modes
 - Real-time status monitoring of connected clients
@@ -151,7 +152,17 @@ Templates can display different types of content in each panel:
 }
 ```
 
-#### 2. Adaptive Card Content
+#### 2. HTML Content
+
+```json
+{
+  "contentType": "html",
+  "data": "<div><h1>HTML Heading</h1><p>This is <em>formatted</em> content with <span style=\"color:blue;\">styling</span>.</p></div>",
+  "textColor": "#333333"
+}
+```
+
+#### 3. Adaptive Card Content
 
 ```json
 {
@@ -167,7 +178,7 @@ Templates can display different types of content in each panel:
 }
 ```
 
-#### 3. Image Content
+#### 4. Image Content
 
 ```json
 {
@@ -202,6 +213,22 @@ Templates can display different types of content in each panel:
 }
 ```
 
+#### Full-Screen HTML Example
+
+```javascript
+// POST to /api/broadcast
+{
+  "type": "full-screen",
+  "theme": "light",
+  "backgroundColor": "#ffffff",
+  "content": {
+    "contentType": "html",
+    "data": "<div style=\"text-align: center;\"><h1>Welcome</h1><p>This is a <strong>full-screen</strong> HTML template with <span style=\"color: blue;\">styled</span> content.</p></div>",
+    "textColor": "#333333"
+  }
+}
+```
+
 #### Split-Screen Example with Image and Markdown
 
 ```javascript
@@ -225,6 +252,42 @@ Templates can display different types of content in each panel:
       "contentType": "markdown",
       "data": "# Details\n\nThis is the detail panel that explains the image.",
       "textColor": "#333333"
+    }
+  }
+}
+```
+
+#### Split-Screen Example with HTML and Adaptive Card
+
+```javascript
+// POST to /api/broadcast
+{
+  "type": "split-screen",
+  "theme": "light",
+  "leftPanel": {
+    "width": 30,
+    "backgroundColor": "#f0f9ff",
+    "content": {
+      "contentType": "html",
+      "data": "<nav><ul><li><a href=\"#\">Home</a></li><li><a href=\"#\">Products</a></li><li><a href=\"#\">Contact</a></li></ul></nav>",
+      "textColor": "#333333"
+    }
+  },
+  "rightPanel": {
+    "backgroundColor": "#ffffff",
+    "content": {
+      "contentType": "adaptive-card",
+      "data": {
+        "type": "AdaptiveCard",
+        "version": "1.5",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "Adaptive Card Example",
+            "size": "large"
+          }
+        ]
+      }
     }
   }
 }

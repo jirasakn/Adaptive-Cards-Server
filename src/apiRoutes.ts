@@ -18,6 +18,12 @@ export function createApiRoutes(wsServer: KioskWebSocketServer): Router {
         }
         return { valid: true };
       
+      case 'html':
+        if (typeof content.data !== 'string') {
+          return { valid: false, message: 'HTML content must have a "data" field of type string.' };
+        }
+        return { valid: true };
+      
       case 'adaptive-card':
         if (!content.data || typeof content.data !== 'object') {
           return { valid: false, message: 'Adaptive card content must have a "data" field of type object.' };

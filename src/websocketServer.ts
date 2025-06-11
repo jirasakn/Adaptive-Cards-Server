@@ -63,6 +63,9 @@ export class KioskWebSocketServer {
       case 'markdown':
         return typeof content.data === 'string';
       
+      case 'html':
+        return typeof content.data === 'string';
+      
       case 'adaptive-card':
         return content.data !== null && typeof content.data === 'object';
       

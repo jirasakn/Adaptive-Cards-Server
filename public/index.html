@@ -211,6 +211,7 @@
         <div class="tab" data-tab="split-screen">Split Screen Template</div>
         <div class="tab" data-tab="image">Image</div>
         <div class="tab" data-tab="markdown">Markdown</div>
+        <div class="tab" data-tab="html">HTML</div>
         <div class="tab" data-tab="adaptive-card">Adaptive Card</div>
       </div>
       
@@ -236,6 +237,7 @@
           <select id="full-screen-content-type">
             <option value="markdown">Markdown</option>
             <option value="image">Image</option>
+            <option value="html">HTML</option>
             <option value="adaptive-card">Adaptive Card</option>
           </select>
         </div>
@@ -280,6 +282,7 @@
                 <select id="left-panel-content-type">
                   <option value="markdown">Markdown</option>
                   <option value="image">Image</option>
+                  <option value="html">HTML</option>
                   <option value="adaptive-card">Adaptive Card</option>
                 </select>
               </div>
@@ -305,6 +308,7 @@
                 <select id="right-panel-content-type">
                   <option value="markdown">Markdown</option>
                   <option value="image">Image</option>
+                  <option value="html">HTML</option>
                   <option value="adaptive-card">Adaptive Card</option>
                 </select>
               </div>
@@ -451,6 +455,34 @@ Visit [our website](https://example.com) for more information.</textarea>
         
         <button id="send-adaptive-card">Send as Full Screen Template</button>
       </div>
+      
+      <!-- HTML Tab -->
+      <div class="tab-content" id="html-tab">
+        <h2>HTML Content</h2>
+        <div class="input-group">
+          <label for="html-content">HTML Content:</label>
+          <textarea id="html-content" placeholder="<h1>Heading</h1>&#10;<p>Your HTML content here</p>"><div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+  <h1 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Welcome to HTML Content</h1>
+  
+  <p style="font-size: 16px; line-height: 1.6;">
+    This is a sample HTML content that demonstrates styling capabilities.
+  </p>
+  
+  <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 4px;">
+    <h3 style="margin-top: 0; color: #3498db;">Did you know?</h3>
+    <p>HTML content allows for rich formatting and styling options.</p>
+  </div>
+  
+  <ul style="list-style-type: circle;">
+    <li>Custom styling</li>
+    <li>Rich text formatting</li>
+    <li>Embedded content</li>
+  </ul>
+</div></textarea>
+        </div>
+        
+        <button id="send-html">Send as Full Screen Template</button>
+      </div>
     </div>
     
     <div class="response" id="response">
@@ -490,6 +522,7 @@ Visit [our website](https://example.com) for more information.</textarea>
       document.getElementById('send-image').addEventListener('click', sendImageAsFullScreen);
       document.getElementById('send-markdown').addEventListener('click', sendMarkdownAsFullScreen);
       document.getElementById('send-adaptive-card').addEventListener('click', sendAdaptiveCardAsFullScreen);
+      document.getElementById('send-html').addEventListener('click', sendHtmlAsFullScreen);
       
       // Setup split screen slider
       const leftWidthSlider = document.getElementById('split-screen-left-width');
@@ -590,6 +623,22 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
             <div class="input-group">
               <label for="${container.id}-image-alt">Alt Text:</label>
               <input type="text" id="${container.id}-image-alt" value="Image description" placeholder="Description of the image">
+            </div>
+          `;
+          break;
+          
+        case 'html':
+          configHtml = `
+            <div class="input-group">
+              <label for="${container.id}-html">HTML Content:</label>
+              <textarea id="${container.id}-html" rows="8" placeholder="<h1>Heading</h1>\n<p>Your HTML content here</p>"><div style="font-family: Arial, sans-serif; padding: 10px; color: #333;">
+  <h2 style="color: #2c3e50;">${container.id.replace(/-/g, ' ')} Content</h2>
+  <p>This is sample HTML content for the ${container.id.replace(/-/g, ' ')}.</p>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+  </ul>
+</div></textarea>
             </div>
           `;
           break;
@@ -750,6 +799,12 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
           );
           break;
           
+        case 'html':
+          content = createHtmlContent(
+            document.getElementById('full-screen-content-config-html').value
+          );
+          break;
+          
         case 'adaptive-card':
           content = createAdaptiveCardContent(
             document.getElementById('full-screen-content-config-adaptive-card').value
@@ -793,6 +848,12 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
           );
           break;
           
+        case 'html':
+          leftContent = createHtmlContent(
+            document.getElementById('left-panel-content-config-html').value
+          );
+          break;
+          
         case 'adaptive-card':
           leftContent = createAdaptiveCardContent(
             document.getElementById('left-panel-content-config-adaptive-card').value
@@ -815,6 +876,12 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
             document.getElementById('right-panel-content-config-image-url').value,
             document.getElementById('right-panel-content-config-image-display-mode').value,
             document.getElementById('right-panel-content-config-image-alt').value
+          );
+          break;
+          
+        case 'html':
+          rightContent = createHtmlContent(
+            document.getElementById('right-panel-content-config-html').value
           );
           break;
           
@@ -916,6 +983,22 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
       }
     }
     
+    function sendHtmlAsFullScreen() {
+      const htmlContent = document.getElementById('html-content').value;
+      
+      const template = {
+        type: 'full-screen',
+        theme: 'light',
+        backgroundColor: '#ffffff',
+        content: {
+          contentType: 'html',
+          data: htmlContent
+        }
+      };
+      
+      sendTemplate(template);
+    }
+    
     function createMarkdownContent(markdown, textColor) {
       return {
         contentType: 'markdown',
@@ -947,6 +1030,13 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
         }, true);
         throw error;
       }
+    }
+    
+    function createHtmlContent(html) {
+      return {
+        contentType: 'html',
+        data: html
+      };
     }
     
     function sendTemplate(template) {

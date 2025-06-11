@@ -12,6 +12,12 @@ export interface MarkdownContent {
   textColor?: string;
 }
 
+export interface HTMLContent {
+  contentType: 'html';
+  data: string;
+  textColor?: string;
+}
+
 export interface AdaptiveCardContent {
   contentType: 'adaptive-card';
   data: object;
@@ -30,7 +36,7 @@ export interface ImageContent {
   };
 }
 
-export type ContentData = MarkdownContent | AdaptiveCardContent | ImageContent;
+export type ContentData = MarkdownContent | AdaptiveCardContent | ImageContent | HTMLContent;
 
 // Template Definitions
 export interface BaseTemplateConfig {
