@@ -3,13 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiosk Adaptive Card Sender</title>
+  <title>Kiosk Template Sender</title>
   <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-hover: #45a049;
+      --light-bg: #f5f5f5;
+      --border: #ddd;
+      --text: #333;
+      --success: #4CAF50;
+      --error: #f44336;
+      --panel-bg: #f8f9fa;
+    }
+    
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: #f5f5f5;
+      background-color: var(--light-bg);
+      color: var(--text);
     }
     
     .container {
@@ -21,21 +33,20 @@
       padding: 20px;
     }
     
+    h1, h2, h3 {
+      color: var(--text);
+    }
+    
     h1 {
-      color: #333;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
     }
     
     .status-section {
       margin-bottom: 20px;
       padding: 15px;
-      background-color: #f8f9fa;
+      background-color: var(--panel-bg);
       border-radius: 4px;
-    }
-    
-    .status-section h2 {
-      margin-top: 0;
     }
     
     .tab-container {
@@ -44,14 +55,15 @@
     
     .tabs {
       display: flex;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
     
     .tab {
       padding: 10px 20px;
       cursor: pointer;
       background-color: #f1f1f1;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border);
       border-bottom: none;
       margin-right: 5px;
       border-radius: 5px 5px 0 0;
@@ -66,7 +78,7 @@
     .tab-content {
       display: none;
       padding: 20px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border);
       border-top: none;
       border-radius: 0 0 5px 5px;
     }
@@ -77,9 +89,9 @@
     
     textarea {
       width: 100%;
-      min-height: 300px;
+      min-height: 200px;
       padding: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border);
       border-radius: 4px;
       font-family: monospace;
       margin-bottom: 10px;
@@ -98,12 +110,12 @@
     input, select {
       width: 100%;
       padding: 8px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border);
       border-radius: 4px;
     }
     
     button {
-      background-color: #4CAF50;
+      background-color: var(--primary);
       color: white;
       border: none;
       padding: 10px 20px;
@@ -113,20 +125,20 @@
     }
     
     button:hover {
-      background-color: #45a049;
+      background-color: var(--primary-hover);
     }
     
     .response {
       margin-top: 20px;
       padding: 15px;
-      background-color: #f8f9fa;
+      background-color: var(--panel-bg);
       border-radius: 4px;
-      border-left: 4px solid #4CAF50;
+      border-left: 4px solid var(--success);
       display: none;
     }
     
     .error {
-      border-left: 4px solid #f44336;
+      border-left: 4px solid var(--error);
     }
     
     pre {
@@ -137,11 +149,56 @@
       border-radius: 4px;
       overflow-x: auto;
     }
+    
+    .template-preview {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 15px;
+      background-color: var(--panel-bg);
+      margin-top: 15px;
+    }
+    
+    .panel-config {
+      padding: 15px;
+      background-color: var(--panel-bg);
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .flex-container {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .flex-column {
+      flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .flex-container {
+        flex-direction: column;
+      }
+    }
+    
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .color-preview {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ccc;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Kiosk Adaptive Card Sender</h1>
+    <h1>Kiosk Template Sender</h1>
     
     <div class="status-section">
       <h2>Server Status</h2>
@@ -150,12 +207,185 @@
     
     <div class="tab-container">
       <div class="tabs">
-        <div class="tab active" data-tab="markdown">Markdown</div>
+        <div class="tab active" data-tab="full-screen">Full Screen Template</div>
+        <div class="tab" data-tab="split-screen">Split Screen Template</div>
+        <div class="tab" data-tab="image">Image</div>
+        <div class="tab" data-tab="markdown">Markdown</div>
+        <div class="tab" data-tab="html">HTML</div>
         <div class="tab" data-tab="adaptive-card">Adaptive Card</div>
       </div>
       
-      <div class="tab-content active" id="markdown-tab">
-        <h2>Send Markdown Content</h2>
+      <!-- Full Screen Template Tab -->
+      <div class="tab-content active" id="full-screen-tab">
+        <h2>Full Screen Template</h2>
+        <div class="input-group">
+          <label for="full-screen-theme">Theme:</label>
+          <select id="full-screen-theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        
+        <div class="input-group">
+          <label for="full-screen-bgcolor">Background Color:</label>
+          <input type="text" id="full-screen-bgcolor" value="#ffffff" placeholder="e.g., #ffffff">
+          <div class="color-preview" id="full-screen-bgcolor-preview" style="background-color: #ffffff;"></div>
+        </div>
+        
+        <div class="input-group">
+          <label for="full-screen-content-type">Content Type:</label>
+          <select id="full-screen-content-type">
+            <option value="markdown">Markdown</option>
+            <option value="image">Image</option>
+            <option value="html">HTML</option>
+            <option value="adaptive-card">Adaptive Card</option>
+          </select>
+        </div>
+        
+        <div id="full-screen-content-config">
+          <!-- Content configuration will be loaded here based on selection -->
+        </div>
+        
+        <button id="send-full-screen">Send Full Screen Template</button>
+      </div>
+      
+      <!-- Split Screen Template Tab -->
+      <div class="tab-content" id="split-screen-tab">
+        <h2>Split Screen Template</h2>
+        <div class="input-group">
+          <label for="split-screen-theme">Theme:</label>
+          <select id="split-screen-theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        
+        <div class="input-group">
+          <label for="split-screen-left-width">Left Panel Width (%):</label>
+          <input type="range" id="split-screen-left-width" min="10" max="90" value="50" step="5">
+          <span id="split-screen-left-width-value">50%</span>
+        </div>
+        
+        <div class="flex-container">
+          <!-- Left Panel Configuration -->
+          <div class="flex-column">
+            <div class="panel-config">
+              <h3>Left Panel</h3>
+              <div class="input-group">
+                <label for="left-panel-bgcolor">Background Color:</label>
+                <input type="text" id="left-panel-bgcolor" value="#f0f9ff" placeholder="e.g., #f0f9ff">
+                <div class="color-preview" id="left-panel-bgcolor-preview" style="background-color: #f0f9ff;"></div>
+              </div>
+              
+              <div class="input-group">
+                <label for="left-panel-content-type">Content Type:</label>
+                <select id="left-panel-content-type">
+                  <option value="markdown">Markdown</option>
+                  <option value="image">Image</option>
+                  <option value="html">HTML</option>
+                  <option value="adaptive-card">Adaptive Card</option>
+                </select>
+              </div>
+              
+              <div id="left-panel-content-config">
+                <!-- Content configuration will be loaded here based on selection -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Panel Configuration -->
+          <div class="flex-column">
+            <div class="panel-config">
+              <h3>Right Panel</h3>
+              <div class="input-group">
+                <label for="right-panel-bgcolor">Background Color:</label>
+                <input type="text" id="right-panel-bgcolor" value="#ffffff" placeholder="e.g., #ffffff">
+                <div class="color-preview" id="right-panel-bgcolor-preview" style="background-color: #ffffff;"></div>
+              </div>
+              
+              <div class="input-group">
+                <label for="right-panel-content-type">Content Type:</label>
+                <select id="right-panel-content-type">
+                  <option value="markdown">Markdown</option>
+                  <option value="image">Image</option>
+                  <option value="html">HTML</option>
+                  <option value="adaptive-card">Adaptive Card</option>
+                </select>
+              </div>
+              
+              <div id="right-panel-content-config">
+                <!-- Content configuration will be loaded here based on selection -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button id="send-split-screen">Send Split Screen Template</button>
+      </div>
+      
+      <!-- Image Tab -->
+      <div class="tab-content" id="image-tab">
+        <h2>Image Content</h2>
+        <div class="input-group">
+          <label for="image-url">Image URL:</label>
+          <input type="text" id="image-url" placeholder="https://example.com/image.jpg or base64 data URI" value="https://images.unsplash.com/photo-1501854140801-50d01698950b">
+          <p class="help-text">You can use a URL or base64 data URI (e.g., data:image/png;base64,iVBORw0KGgo...)</p>
+        </div>
+        
+        <div class="input-group">
+          <label for="image-file">Or upload an image:</label>
+          <input type="file" id="image-file" accept="image/*">
+          <p class="help-text">The image will be converted to base64 format (max size: 50MB)</p>
+        </div>
+        
+        <div class="input-group">
+          <label for="image-display-mode">Display Mode:</label>
+          <select id="image-display-mode">
+            <option value="fit">Fit (maintain aspect ratio)</option>
+            <option value="stretch">Stretch (ignore aspect ratio)</option>
+            <option value="cover" selected>Cover (fill container, may crop)</option>
+            <option value="contain">Contain (show entire image)</option>
+            <option value="center">Center (no scaling)</option>
+          </select>
+        </div>
+        
+        <div class="input-group">
+          <label for="image-alt-text">Alt Text:</label>
+          <input type="text" id="image-alt-text" placeholder="Description of the image" value="Scenic landscape">
+        </div>
+        
+        <div class="input-group">
+          <label for="image-border-radius">Border Radius (px):</label>
+          <input type="number" id="image-border-radius" min="0" max="50" value="0">
+        </div>
+        
+        <div class="input-group">
+          <label for="image-border-color">Border Color:</label>
+          <input type="text" id="image-border-color" placeholder="e.g., #cccccc" value="">
+          <div class="color-preview" id="image-border-color-preview" style="background-color: transparent;"></div>
+        </div>
+        
+        <div class="input-group">
+          <label for="image-border-width">Border Width (px):</label>
+          <input type="number" id="image-border-width" min="0" max="10" value="0">
+        </div>
+        
+        <div class="input-group">
+          <label for="image-box-shadow">Box Shadow:</label>
+          <input type="text" id="image-box-shadow" placeholder="e.g., 0 4px 8px rgba(0,0,0,0.1)" value="">
+        </div>
+        
+        <div class="template-preview">
+          <h3>Preview:</h3>
+          <img id="image-preview" src="https://images.unsplash.com/photo-1501854140801-50d01698950b" alt="Preview" style="max-width: 100%; height: auto; object-fit: cover;">
+        </div>
+        
+        <button id="send-image">Send as Full Screen Template</button>
+      </div>
+      
+      <!-- Markdown Tab -->
+      <div class="tab-content" id="markdown-tab">
+        <h2>Markdown Content</h2>
         <div class="input-group">
           <label for="markdown-content">Markdown Content:</label>
           <textarea id="markdown-content" placeholder="# Heading 1&#10;&#10;This is a paragraph.&#10;&#10;* Bullet point 1&#10;* Bullet point 2"># Welcome to Kiosk Display
@@ -171,48 +401,46 @@ Visit [our website](https://example.com) for more information.</textarea>
         </div>
         
         <div class="input-group">
-          <label for="markdown-theme">Theme:</label>
-          <select id="markdown-theme">
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
+          <label for="markdown-textcolor">Text Color:</label>
+          <input type="text" id="markdown-textcolor" placeholder="e.g., #333333" value="#333333">
+          <div class="color-preview" id="markdown-textcolor-preview" style="background-color: #333333;"></div>
         </div>
         
-        <div class="input-group">
-          <label for="markdown-bgcolor">Background Color (optional):</label>
-          <input type="text" id="markdown-bgcolor" placeholder="e.g., #f5f5f5">
-        </div>
-        
-        <div class="input-group">
-          <label for="markdown-textcolor">Text Color (optional):</label>
-          <input type="text" id="markdown-textcolor" placeholder="e.g., #333333">
-        </div>
-        
-        <button id="send-markdown">Send Markdown</button>
+        <button id="send-markdown">Send as Full Screen Template</button>
       </div>
       
+      <!-- Adaptive Card Tab -->
       <div class="tab-content" id="adaptive-card-tab">
-        <h2>Send Adaptive Card</h2>
+        <h2>Adaptive Card Content</h2>
         <div class="input-group">
           <label for="adaptive-card-json">Adaptive Card JSON:</label>
-          <textarea id="adaptive-card-json" placeholder="{&#10;  &quot;type&quot;: &quot;AdaptiveCard&quot;,&#10;  &quot;version&quot;: &quot;1.0&quot;,&#10;  &quot;body&quot;: [...]&#10;}">{
+          <textarea id="adaptive-card-json" placeholder="{&#10;  &quot;type&quot;: &quot;AdaptiveCard&quot;,&#10;  &quot;version&quot;: &quot;1.5&quot;,&#10;  &quot;body&quot;: [...]&#10;}">{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
   "type": "AdaptiveCard",
-  "version": "1.0",
+  "version": "1.5",
   "body": [
     {
+      "type": "Container",
+      "items": [
+    {
       "type": "TextBlock",
-      "size": "Medium",
+          "size": "Large",
       "weight": "Bolder",
-      "text": "Adaptive Card Example"
+          "text": "Welcome to Adaptive Cards",
+          "wrap": true
     },
     {
       "type": "TextBlock",
-      "text": "This is an example of an Adaptive Card",
+          "text": "This is a sample adaptive card that demonstrates various capabilities.",
       "wrap": true
     },
     {
       "type": "Image",
-      "url": "https://adaptivecards.io/content/adaptive-card-50.png"
+          "url": "https://adaptivecards.io/content/adaptive-card-50.png",
+          "size": "Medium",
+          "horizontalAlignment": "center"
+        }
+      ]
     }
   ],
   "actions": [
@@ -225,7 +453,35 @@ Visit [our website](https://example.com) for more information.</textarea>
 }</textarea>
         </div>
         
-        <button id="send-adaptive-card">Send Adaptive Card</button>
+        <button id="send-adaptive-card">Send as Full Screen Template</button>
+      </div>
+      
+      <!-- HTML Tab -->
+      <div class="tab-content" id="html-tab">
+        <h2>HTML Content</h2>
+        <div class="input-group">
+          <label for="html-content">HTML Content:</label>
+          <textarea id="html-content" placeholder="<h1>Heading</h1>&#10;<p>Your HTML content here</p>"><div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+  <h1 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Welcome to HTML Content</h1>
+  
+  <p style="font-size: 16px; line-height: 1.6;">
+    This is a sample HTML content that demonstrates styling capabilities.
+  </p>
+  
+  <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 4px;">
+    <h3 style="margin-top: 0; color: #3498db;">Did you know?</h3>
+    <p>HTML content allows for rich formatting and styling options.</p>
+  </div>
+  
+  <ul style="list-style-type: circle;">
+    <li>Custom styling</li>
+    <li>Rich text formatting</li>
+    <li>Embedded content</li>
+  </ul>
+</div></textarea>
+        </div>
+        
+        <button id="send-html">Send as Full Screen Template</button>
       </div>
     </div>
     
@@ -254,13 +510,250 @@ Visit [our website](https://example.com) for more information.</textarea>
         });
       });
       
+      // Initialize content configs
+      setupContentConfigPanels();
+      
       // Fetch server status
       fetchServerStatus();
       
       // Set up event listeners for buttons
-      document.getElementById('send-markdown').addEventListener('click', sendMarkdown);
-      document.getElementById('send-adaptive-card').addEventListener('click', sendAdaptiveCard);
+      document.getElementById('send-full-screen').addEventListener('click', sendFullScreenTemplate);
+      document.getElementById('send-split-screen').addEventListener('click', sendSplitScreenTemplate);
+      document.getElementById('send-image').addEventListener('click', sendImageAsFullScreen);
+      document.getElementById('send-markdown').addEventListener('click', sendMarkdownAsFullScreen);
+      document.getElementById('send-adaptive-card').addEventListener('click', sendAdaptiveCardAsFullScreen);
+      document.getElementById('send-html').addEventListener('click', sendHtmlAsFullScreen);
+      
+      // Setup split screen slider
+      const leftWidthSlider = document.getElementById('split-screen-left-width');
+      const leftWidthValue = document.getElementById('split-screen-left-width-value');
+      
+      leftWidthSlider.addEventListener('input', function() {
+        leftWidthValue.textContent = this.value + '%';
+      });
+      
+      // Setup color pickers
+      setupColorPickers();
+      
+      // Setup image preview
+      setupImagePreview();
     });
+    
+    function setupContentConfigPanels() {
+      // Full screen content config
+      const fullScreenContentType = document.getElementById('full-screen-content-type');
+      const fullScreenContentConfig = document.getElementById('full-screen-content-config');
+      
+      fullScreenContentType.addEventListener('change', function() {
+        loadContentConfig(fullScreenContentConfig, this.value);
+      });
+      
+      // Initialize with default (markdown)
+      loadContentConfig(fullScreenContentConfig, 'markdown');
+      
+      // Left panel content config
+      const leftPanelContentType = document.getElementById('left-panel-content-type');
+      const leftPanelContentConfig = document.getElementById('left-panel-content-config');
+      
+      leftPanelContentType.addEventListener('change', function() {
+        loadContentConfig(leftPanelContentConfig, this.value);
+      });
+      
+      // Initialize with default (markdown)
+      loadContentConfig(leftPanelContentConfig, 'markdown');
+      
+      // Right panel content config
+      const rightPanelContentType = document.getElementById('right-panel-content-type');
+      const rightPanelContentConfig = document.getElementById('right-panel-content-config');
+      
+      rightPanelContentType.addEventListener('change', function() {
+        loadContentConfig(rightPanelContentConfig, this.value);
+      });
+      
+      // Initialize with default (markdown)
+      loadContentConfig(rightPanelContentConfig, 'markdown');
+    }
+    
+    function loadContentConfig(container, contentType) {
+      let configHtml = '';
+      
+      switch (contentType) {
+        case 'markdown':
+          configHtml = `
+            <div class="input-group">
+              <label for="${container.id}-markdown">Markdown Content:</label>
+              <textarea id="${container.id}-markdown" rows="6" placeholder="# Heading\n\nContent goes here..."># ${container.id} Content
+
+This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
+
+- Bullet point 1
+- Bullet point 2
+              </textarea>
+            </div>
+            <div class="input-group">
+              <label for="${container.id}-textcolor">Text Color:</label>
+              <input type="text" id="${container.id}-textcolor" value="#333333" placeholder="#333333">
+              <div class="color-preview" id="${container.id}-textcolor-preview" style="background-color: #333333;"></div>
+            </div>
+          `;
+          break;
+          
+        case 'image':
+          configHtml = `
+            <div class="input-group">
+              <label for="${container.id}-image-url">Image URL:</label>
+              <input type="text" id="${container.id}-image-url" value="https://images.unsplash.com/photo-1501854140801-50d01698950b" placeholder="https://example.com/image.jpg or base64 data URI">
+              <p class="help-text">You can use a URL or base64 data URI</p>
+            </div>
+            <div class="input-group">
+              <label for="${container.id}-image-file">Or upload an image:</label>
+              <input type="file" id="${container.id}-image-file" accept="image/*">
+              <p class="help-text">The image will be converted to base64 format</p>
+            </div>
+            <div class="input-group">
+              <label for="${container.id}-image-display-mode">Display Mode:</label>
+              <select id="${container.id}-image-display-mode">
+                <option value="fit">Fit</option>
+                <option value="stretch">Stretch</option>
+                <option value="cover" selected>Cover</option>
+                <option value="contain">Contain</option>
+                <option value="center">Center</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="${container.id}-image-alt">Alt Text:</label>
+              <input type="text" id="${container.id}-image-alt" value="Image description" placeholder="Description of the image">
+            </div>
+          `;
+          break;
+          
+        case 'html':
+          configHtml = `
+            <div class="input-group">
+              <label for="${container.id}-html">HTML Content:</label>
+              <textarea id="${container.id}-html" rows="8" placeholder="<h1>Heading</h1>\n<p>Your HTML content here</p>"><div style="font-family: Arial, sans-serif; padding: 10px; color: #333;">
+  <h2 style="color: #2c3e50;">${container.id.replace(/-/g, ' ')} Content</h2>
+  <p>This is sample HTML content for the ${container.id.replace(/-/g, ' ')}.</p>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+  </ul>
+</div></textarea>
+            </div>
+          `;
+          break;
+          
+        case 'adaptive-card':
+          configHtml = `
+            <div class="input-group">
+              <label for="${container.id}-adaptive-card">Adaptive Card JSON:</label>
+              <textarea id="${container.id}-adaptive-card" rows="8" placeholder="{...}">{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "size": "Medium",
+      "weight": "Bolder",
+      "text": "${container.id.replace(/-/g, ' ')} Card",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "This is a sample card for ${container.id.replace(/-/g, ' ')}",
+      "wrap": true
+    }
+  ]
+}</textarea>
+            </div>
+          `;
+          break;
+      }
+      
+      container.innerHTML = configHtml;
+      
+      // Initialize color pickers for newly added elements
+      setupColorPickers();
+      
+      // Setup file inputs for image content type
+      if (contentType === 'image') {
+        const fileInput = document.getElementById(`${container.id}-image-file`);
+        const urlInput = document.getElementById(`${container.id}-image-url`);
+        
+        if (fileInput && urlInput) {
+          fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+              // Check file size
+              if (file.size > 50 * 1024 * 1024) {
+                alert('File is too large! Maximum size is 50MB.');
+                return;
+              }
+              
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                urlInput.value = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+      }
+    }
+    
+    function setupColorPickers() {
+      document.querySelectorAll('input[type="text"]').forEach(input => {
+        if (input.id.includes('color') || input.id.includes('bgcolor')) {
+          const previewId = input.id + '-preview';
+          const preview = document.getElementById(previewId);
+          
+          if (preview) {
+            input.addEventListener('input', function() {
+              preview.style.backgroundColor = this.value;
+            });
+          }
+        }
+      });
+    }
+    
+    function setupImagePreview() {
+      const imageUrl = document.getElementById('image-url');
+      const displayMode = document.getElementById('image-display-mode');
+      const preview = document.getElementById('image-preview');
+      const fileInput = document.getElementById('image-file');
+      
+      // Update preview when URL changes
+      imageUrl.addEventListener('input', updateImagePreview);
+      displayMode.addEventListener('change', updateImagePreview);
+      
+      // Handle file uploads and convert to base64
+      if (fileInput) {
+        fileInput.addEventListener('change', function(event) {
+          const file = event.target.files[0];
+          if (file) {
+            // Check file size (max 50MB)
+            if (file.size > 50 * 1024 * 1024) {
+              alert('File is too large! Maximum size is 50MB.');
+              return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const base64data = e.target.result;
+              imageUrl.value = base64data;
+              updateImagePreview();
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+      
+      function updateImagePreview() {
+        preview.src = imageUrl.value;
+        preview.style.objectFit = displayMode.value;
+      }
+    }
     
     function fetchServerStatus() {
       fetch('/api/status')
@@ -283,35 +776,205 @@ Visit [our website](https://example.com) for more information.</textarea>
         });
     }
     
-    function sendMarkdown() {
-      const content = document.getElementById('markdown-content').value;
-      const theme = document.getElementById('markdown-theme').value;
-      const backgroundColor = document.getElementById('markdown-bgcolor').value;
-      const textColor = document.getElementById('markdown-textcolor').value;
+    function sendFullScreenTemplate() {
+      const theme = document.getElementById('full-screen-theme').value;
+      const backgroundColor = document.getElementById('full-screen-bgcolor').value;
+      const contentType = document.getElementById('full-screen-content-type').value;
       
-      const payload = {
-        type: 'markdown',
+      let content;
+      
+      switch (contentType) {
+        case 'markdown':
+          content = createMarkdownContent(
+            document.getElementById('full-screen-content-config-markdown').value,
+            document.getElementById('full-screen-content-config-textcolor').value
+          );
+          break;
+          
+        case 'image':
+          content = createImageContent(
+            document.getElementById('full-screen-content-config-image-url').value,
+            document.getElementById('full-screen-content-config-image-display-mode').value,
+            document.getElementById('full-screen-content-config-image-alt').value
+          );
+          break;
+          
+        case 'html':
+          content = createHtmlContent(
+            document.getElementById('full-screen-content-config-html').value
+          );
+          break;
+          
+        case 'adaptive-card':
+          content = createAdaptiveCardContent(
+            document.getElementById('full-screen-content-config-adaptive-card').value
+          );
+          break;
+      }
+      
+      const template = {
+        type: 'full-screen',
+        theme: theme,
+        backgroundColor: backgroundColor,
         content: content
       };
       
-      if (theme) payload.theme = theme;
-      if (backgroundColor) payload.backgroundColor = backgroundColor;
-      if (textColor) payload.textColor = textColor;
-      
-      sendContent(payload);
+      sendTemplate(template);
     }
     
-    function sendAdaptiveCard() {
+    function sendSplitScreenTemplate() {
+      const theme = document.getElementById('split-screen-theme').value;
+      const leftWidth = document.getElementById('split-screen-left-width').value;
+      const leftBgColor = document.getElementById('left-panel-bgcolor').value;
+      const rightBgColor = document.getElementById('right-panel-bgcolor').value;
+      const leftContentType = document.getElementById('left-panel-content-type').value;
+      const rightContentType = document.getElementById('right-panel-content-type').value;
+      
+      // Create left panel content
+      let leftContent;
+      switch (leftContentType) {
+        case 'markdown':
+          leftContent = createMarkdownContent(
+            document.getElementById('left-panel-content-config-markdown').value,
+            document.getElementById('left-panel-content-config-textcolor').value
+          );
+          break;
+          
+        case 'image':
+          leftContent = createImageContent(
+            document.getElementById('left-panel-content-config-image-url').value,
+            document.getElementById('left-panel-content-config-image-display-mode').value,
+            document.getElementById('left-panel-content-config-image-alt').value
+          );
+          break;
+          
+        case 'html':
+          leftContent = createHtmlContent(
+            document.getElementById('left-panel-content-config-html').value
+          );
+          break;
+          
+        case 'adaptive-card':
+          leftContent = createAdaptiveCardContent(
+            document.getElementById('left-panel-content-config-adaptive-card').value
+          );
+          break;
+      }
+      
+      // Create right panel content
+      let rightContent;
+      switch (rightContentType) {
+        case 'markdown':
+          rightContent = createMarkdownContent(
+            document.getElementById('right-panel-content-config-markdown').value,
+            document.getElementById('right-panel-content-config-textcolor').value
+          );
+          break;
+          
+        case 'image':
+          rightContent = createImageContent(
+            document.getElementById('right-panel-content-config-image-url').value,
+            document.getElementById('right-panel-content-config-image-display-mode').value,
+            document.getElementById('right-panel-content-config-image-alt').value
+          );
+          break;
+          
+        case 'html':
+          rightContent = createHtmlContent(
+            document.getElementById('right-panel-content-config-html').value
+          );
+          break;
+          
+        case 'adaptive-card':
+          rightContent = createAdaptiveCardContent(
+            document.getElementById('right-panel-content-config-adaptive-card').value
+          );
+          break;
+      }
+      
+      const template = {
+        type: 'split-screen',
+        theme: theme,
+        leftPanel: {
+          width: parseInt(leftWidth),
+          backgroundColor: leftBgColor,
+          content: leftContent
+        },
+        rightPanel: {
+          backgroundColor: rightBgColor,
+          content: rightContent
+        }
+      };
+      
+      sendTemplate(template);
+    }
+    
+    function sendImageAsFullScreen() {
+      const imageUrl = document.getElementById('image-url').value;
+      const displayMode = document.getElementById('image-display-mode').value;
+      const altText = document.getElementById('image-alt-text').value;
+      const borderRadius = document.getElementById('image-border-radius').value;
+      const borderColor = document.getElementById('image-border-color').value;
+      const borderWidth = document.getElementById('image-border-width').value;
+      const boxShadow = document.getElementById('image-box-shadow').value;
+      
+      const content = {
+        contentType: 'image',
+        imageUrl: imageUrl,
+        displayMode: displayMode,
+        altText: altText,
+        styling: {}
+      };
+      
+      if (borderRadius) content.styling.borderRadius = parseInt(borderRadius);
+      if (borderColor) content.styling.borderColor = borderColor;
+      if (borderWidth) content.styling.borderWidth = parseInt(borderWidth);
+      if (boxShadow) content.styling.boxShadow = boxShadow;
+      
+      const template = {
+        type: 'full-screen',
+        theme: 'light',
+        backgroundColor: '#000000',
+        content: content
+      };
+      
+      sendTemplate(template);
+    }
+    
+    function sendMarkdownAsFullScreen() {
+      const content = document.getElementById('markdown-content').value;
+      const textColor = document.getElementById('markdown-textcolor').value;
+      
+      const template = {
+        type: 'full-screen',
+        theme: 'light',
+        backgroundColor: '#ffffff',
+        content: {
+          contentType: 'markdown',
+          data: content,
+          textColor: textColor
+        }
+      };
+      
+      sendTemplate(template);
+    }
+    
+    function sendAdaptiveCardAsFullScreen() {
       try {
         const cardJson = document.getElementById('adaptive-card-json').value;
         const cardData = JSON.parse(cardJson);
         
-        const payload = {
-          type: 'adaptive-card',
+        const template = {
+          type: 'full-screen',
+          theme: 'light',
+          backgroundColor: '#ffffff',
+          content: {
+            contentType: 'adaptive-card',
           data: cardData
+          }
         };
         
-        sendContent(payload);
+        sendTemplate(template);
       } catch (error) {
         showResponse({
           success: false,
@@ -320,13 +983,69 @@ Visit [our website](https://example.com) for more information.</textarea>
       }
     }
     
-    function sendContent(payload) {
+    function sendHtmlAsFullScreen() {
+      const htmlContent = document.getElementById('html-content').value;
+      
+      const template = {
+        type: 'full-screen',
+        theme: 'light',
+        backgroundColor: '#ffffff',
+        content: {
+          contentType: 'html',
+          data: htmlContent
+        }
+      };
+      
+      sendTemplate(template);
+    }
+    
+    function createMarkdownContent(markdown, textColor) {
+      return {
+        contentType: 'markdown',
+        data: markdown,
+        textColor: textColor
+      };
+    }
+    
+    function createImageContent(url, displayMode, altText) {
+      return {
+        contentType: 'image',
+        imageUrl: url,
+        displayMode: displayMode,
+        altText: altText
+      };
+    }
+    
+    function createAdaptiveCardContent(jsonStr) {
+      try {
+        const cardData = JSON.parse(jsonStr);
+        return {
+          contentType: 'adaptive-card',
+          data: cardData
+        };
+      } catch (error) {
+        showResponse({
+          success: false,
+          message: 'Invalid Adaptive Card JSON: ' + error.message
+        }, true);
+        throw error;
+      }
+    }
+    
+    function createHtmlContent(html) {
+      return {
+        contentType: 'html',
+        data: html
+      };
+    }
+    
+    function sendTemplate(template) {
       fetch('/api/broadcast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(template)
       })
       .then(response => response.json())
       .then(data => {
@@ -338,7 +1057,7 @@ Visit [our website](https://example.com) for more information.</textarea>
       .catch(error => {
         showResponse({
           success: false,
-          message: 'Error sending content: ' + error.message
+          message: 'Error sending template: ' + error.message
         }, true);
       });
     }

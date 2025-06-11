@@ -1,11 +1,12 @@
 import { Server as HTTPServer } from 'http';
 import { Server as WebSocketServer, WebSocket } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
-import { Client, DisplayInput } from './types';
+import { Client, TemplateConfig, ContentData } from './types';
 
 export class KioskWebSocketServer {
   private wss: WebSocketServer;
   private clients: Map<string, Client> = new Map();
+  private lastValidTemplate: TemplateConfig | null = null;
 
   constructor(server: HTTPServer) {
     this.wss = new WebSocketServer({ server, path: '/display' });
@@ -21,14 +22,17 @@ export class KioskWebSocketServer {
       // Store the client
       this.clients.set(clientId, { id: clientId, ws });
       
-      // Send welcome message
-      const welcomeMessage: DisplayInput = {
-        type: 'markdown',
-        content: '# Welcome to Kiosk Display\n\nWaiting for content...',
-        theme: 'light'
+      // Send welcome template or last valid template if available
+      const welcomeTemplate: TemplateConfig = this.lastValidTemplate || {
+        type: 'full-screen',
+        theme: 'light',
+        content: {
+          contentType: 'markdown',
+          data: '# Welcome to Kiosk Display\n\nWaiting for content...'
+        }
       };
       
-      ws.send(JSON.stringify(welcomeMessage));
+      ws.send(JSON.stringify(welcomeTemplate));
       
       // Handle client disconnect
       ws.on('close', () => {
@@ -49,11 +53,93 @@ export class KioskWebSocketServer {
     });
   }
 
-  // Broadcast to all connected clients
-  public broadcast(content: DisplayInput) {
-    const message = JSON.stringify(content);
+  // Validate content data
+  private validateContentData(content: ContentData): boolean {
+    if (!content || !content.contentType) {
+      return false;
+    }
+
+    switch (content.contentType) {
+      case 'markdown':
+        return typeof content.data === 'string';
+      
+      case 'html':
+        return typeof content.data === 'string';
+      
+      case 'adaptive-card':
+        return content.data !== null && typeof content.data === 'object';
+      
+      case 'image':
+        const isUrl = Boolean(content.imageUrl && content.imageUrl.match(/^https?:\/\//i));
+        const isBase64 = Boolean(content.imageUrl && content.imageUrl.match(/^data:image\/[a-z]+;base64,/i));
+        
+        return Boolean(content.imageUrl) && 
+               (isUrl || isBase64) &&
+               ['fit', 'stretch', 'cover', 'contain', 'center'].includes(content.displayMode);
+      
+      default:
+        return false;
+    }
+  }
+
+  // Validate template
+  private validateTemplate(template: TemplateConfig): boolean {
+    if (!template || !template.type) {
+      return false;
+    }
+
+    // Validate template type
+    if (template.type !== 'full-screen' && template.type !== 'split-screen') {
+      return false;
+    }
+
+    // Validate full-screen template
+    if (template.type === 'full-screen') {
+      if (!template.content) {
+        return false;
+      }
+      
+      return this.validateContentData(template.content);
+    }
     
-    console.log(`Broadcasting to ${this.clients.size} clients:`, content.type);
+    // Validate split-screen template
+    if (template.type === 'split-screen') {
+      if (!template.leftPanel || !template.rightPanel) {
+        return false;
+      }
+      
+      if (!template.leftPanel.content || !template.rightPanel.content) {
+        return false;
+      }
+      
+      // Width should be between 10 and 90
+      if (!template.leftPanel.width || template.leftPanel.width < 10 || template.leftPanel.width > 90) {
+        return false;
+      }
+      
+      return this.validateContentData(template.leftPanel.content) && 
+             this.validateContentData(template.rightPanel.content);
+    }
+    
+    return false;
+  }
+
+  // Broadcast to all connected clients
+  public broadcast(template: TemplateConfig): number {
+    // Validate the template
+    const isValid = this.validateTemplate(template);
+    
+    if (!isValid) {
+      console.error('Invalid template format, broadcast rejected:', template);
+      return 0;
+    }
+    
+    // Store as last valid template
+    this.lastValidTemplate = template;
+    
+    const message = JSON.stringify(template);
+    
+    console.log(`Broadcasting to ${this.clients.size} clients:`, template.type);
     
     this.clients.forEach(client => {
       if (client.ws.readyState === client.ws.OPEN) {
