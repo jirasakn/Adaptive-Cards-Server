@@ -67,7 +67,11 @@ export class KioskWebSocketServer {
         return content.data !== null && typeof content.data === 'object';
       
       case 'image':
+        const isUrl = Boolean(content.imageUrl && content.imageUrl.match(/^https?:\/\//i));
+        const isBase64 = Boolean(content.imageUrl && content.imageUrl.match(/^data:image\/[a-z]+;base64,/i));
+        
         return Boolean(content.imageUrl) && 
+               (isUrl || isBase64) &&
                ['fit', 'stretch', 'cover', 'contain', 'center'].includes(content.displayMode);
       
       default:

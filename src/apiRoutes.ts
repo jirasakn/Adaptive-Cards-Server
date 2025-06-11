@@ -29,6 +29,14 @@ export function createApiRoutes(wsServer: KioskWebSocketServer): Router {
           return { valid: false, message: 'Image content must include "imageUrl" field.' };
         }
         
+        // Validate that the imageUrl is either a URL or a base64 data URI
+        const isUrl = content.imageUrl.match(/^https?:\/\//i);
+        const isBase64 = content.imageUrl.match(/^data:image\/[a-z]+;base64,/i);
+        
+        if (!isUrl && !isBase64) {
+          return { valid: false, message: 'Image URL must be a valid HTTP/HTTPS URL or a base64 data URI.' };
+        }
+        
         if (!content.displayMode || !['fit', 'stretch', 'cover', 'contain', 'center'].includes(content.displayMode)) {
           return { valid: false, message: 'Image content must include valid "displayMode" field: fit, stretch, cover, contain, or center.' };
         }

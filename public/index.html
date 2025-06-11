@@ -324,7 +324,14 @@
         <h2>Image Content</h2>
         <div class="input-group">
           <label for="image-url">Image URL:</label>
-          <input type="text" id="image-url" placeholder="https://example.com/image.jpg" value="https://images.unsplash.com/photo-1501854140801-50d01698950b">
+          <input type="text" id="image-url" placeholder="https://example.com/image.jpg or base64 data URI" value="https://images.unsplash.com/photo-1501854140801-50d01698950b">
+          <p class="help-text">You can use a URL or base64 data URI (e.g., data:image/png;base64,iVBORw0KGgo...)</p>
+        </div>
+        
+        <div class="input-group">
+          <label for="image-file">Or upload an image:</label>
+          <input type="file" id="image-file" accept="image/*">
+          <p class="help-text">The image will be converted to base64 format (max size: 50MB)</p>
         </div>
         
         <div class="input-group">
@@ -562,7 +569,13 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
           configHtml = `
             <div class="input-group">
               <label for="${container.id}-image-url">Image URL:</label>
-              <input type="text" id="${container.id}-image-url" value="https://images.unsplash.com/photo-1501854140801-50d01698950b" placeholder="https://example.com/image.jpg">
+              <input type="text" id="${container.id}-image-url" value="https://images.unsplash.com/photo-1501854140801-50d01698950b" placeholder="https://example.com/image.jpg or base64 data URI">
+              <p class="help-text">You can use a URL or base64 data URI</p>
+            </div>
+            <div class="input-group">
+              <label for="${container.id}-image-file">Or upload an image:</label>
+              <input type="file" id="${container.id}-image-file" accept="image/*">
+              <p class="help-text">The image will be converted to base64 format</p>
             </div>
             <div class="input-group">
               <label for="${container.id}-image-display-mode">Display Mode:</label>
@@ -613,6 +626,31 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
       
       // Initialize color pickers for newly added elements
       setupColorPickers();
+      
+      // Setup file inputs for image content type
+      if (contentType === 'image') {
+        const fileInput = document.getElementById(`${container.id}-image-file`);
+        const urlInput = document.getElementById(`${container.id}-image-url`);
+        
+        if (fileInput && urlInput) {
+          fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+              // Check file size
+              if (file.size > 50 * 1024 * 1024) {
+                alert('File is too large! Maximum size is 50MB.');
+                return;
+              }
+              
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                urlInput.value = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+      }
     }
     
     function setupColorPickers() {
@@ -634,10 +672,33 @@ This is sample markdown content for the ${container.id.replace(/-/g, ' ')}.
       const imageUrl = document.getElementById('image-url');
       const displayMode = document.getElementById('image-display-mode');
       const preview = document.getElementById('image-preview');
+      const fileInput = document.getElementById('image-file');
       
       // Update preview when URL changes
       imageUrl.addEventListener('input', updateImagePreview);
       displayMode.addEventListener('change', updateImagePreview);
+      
+      // Handle file uploads and convert to base64
+      if (fileInput) {
+        fileInput.addEventListener('change', function(event) {
+          const file = event.target.files[0];
+          if (file) {
+            // Check file size (max 50MB)
+            if (file.size > 50 * 1024 * 1024) {
+              alert('File is too large! Maximum size is 50MB.');
+              return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const base64data = e.target.result;
+              imageUrl.value = base64data;
+              updateImagePreview();
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
       
       function updateImagePreview() {
         preview.src = imageUrl.value;

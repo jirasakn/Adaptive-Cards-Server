@@ -16,7 +16,8 @@ const wsServer = new KioskWebSocketServer(server);
 
 // Configure Express middleware
 app.use(cors());
-app.use(bodyParser.json());
+// Increase JSON payload limit to 50MB to support base64 encoded images
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Set up API routes
