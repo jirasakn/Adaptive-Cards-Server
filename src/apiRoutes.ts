@@ -1,9 +1,44 @@
 import express, { Request, Response, Router } from 'express';
 import { KioskWebSocketServer } from './websocketServer';
-import { ApiResponse, TemplateConfig } from './types';
+import { ApiResponse, TemplateConfig, ContentData } from './types';
 
 export function createApiRoutes(wsServer: KioskWebSocketServer): Router {
   const router = express.Router();
+
+  // Helper function to validate content data
+  const validateContentData = (content: any): { valid: boolean; message?: string } => {
+    if (!content || !content.contentType) {
+      return { valid: false, message: 'Content must include "contentType" field.' };
+    }
+
+    switch (content.contentType) {
+      case 'markdown':
+        if (typeof content.data !== 'string') {
+          return { valid: false, message: 'Markdown content must have a "data" field of type string.' };
+        }
+        return { valid: true };
+      
+      case 'adaptive-card':
+        if (!content.data || typeof content.data !== 'object') {
+          return { valid: false, message: 'Adaptive card content must have a "data" field of type object.' };
+        }
+        return { valid: true };
+      
+      case 'image':
+        if (!content.imageUrl) {
+          return { valid: false, message: 'Image content must include "imageUrl" field.' };
+        }
+        
+        if (!content.displayMode || !['fit', 'stretch', 'cover', 'contain', 'center'].includes(content.displayMode)) {
+          return { valid: false, message: 'Image content must include valid "displayMode" field: fit, stretch, cover, contain, or center.' };
+        }
+        
+        return { valid: true };
+      
+      default:
+        return { valid: false, message: `Unsupported content type: ${content.contentType}` };
+    }
+  };
 
   // GET endpoint to check server status and connected clients
   router.get('/status', (req: Request, res: Response) => {
@@ -27,7 +62,7 @@ export function createApiRoutes(wsServer: KioskWebSocketServer): Router {
     try {
       const template = req.body as TemplateConfig;
       
-      // Validate template
+      // Validate basic template structure
       if (!template || !template.type) {
         return res.status(400).json({
           success: false,
@@ -52,10 +87,12 @@ export function createApiRoutes(wsServer: KioskWebSocketServer): Router {
           });
         }
         
-        if (!template.content.contentType) {
+        // Validate content data
+        const contentValidation = validateContentData(template.content);
+        if (!contentValidation.valid) {
           return res.status(400).json({
             success: false,
-            message: 'Content must include "contentType" field.'
+            message: contentValidation.message
           });
         }
       }
@@ -82,10 +119,37 @@ export function createApiRoutes(wsServer: KioskWebSocketServer): Router {
             message: 'leftPanel.width must be between 10 and 90.'
           });
         }
+        
+        // Validate left panel content
+        const leftContentValidation = validateContentData(template.leftPanel.content);
+        if (!leftContentValidation.valid) {
+          return res.status(400).json({
+            success: false,
+            message: `Left panel: ${leftContentValidation.message}`
+          });
+        }
+        
+        // Validate right panel content
+        const rightContentValidation = validateContentData(template.rightPanel.content);
+        if (!rightContentValidation.valid) {
+          return res.status(400).json({
+            success: false,
+            message: `Right panel: ${rightContentValidation.message}`
+          });
+        }
       }
       
       // Broadcast to all clients
       const clientsReceived = wsServer.broadcast(template);
+      
+      // If no clients received the broadcast, there might be a validation error
+      if (clientsReceived === 0) {
+        // The WebSocket server has more detailed validation, which might have rejected this
+        return res.status(400).json({
+          success: false,
+          message: 'Template validation failed. Check server logs for details.'
+        });
+      }
       
       // Return success response
       res.json({
