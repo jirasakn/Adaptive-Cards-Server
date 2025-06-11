@@ -1,7 +1,7 @@
 import { Server as HTTPServer } from 'http';
 import { Server as WebSocketServer, WebSocket } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
-import { Client, DisplayInput } from './types';
+import { Client, TemplateConfig } from './types';
 
 export class KioskWebSocketServer {
   private wss: WebSocketServer;
@@ -21,14 +21,17 @@ export class KioskWebSocketServer {
       // Store the client
       this.clients.set(clientId, { id: clientId, ws });
       
-      // Send welcome message
-      const welcomeMessage: DisplayInput = {
-        type: 'markdown',
-        content: '# Welcome to Kiosk Display\n\nWaiting for content...',
-        theme: 'light'
+      // Send welcome template
+      const welcomeTemplate: TemplateConfig = {
+        type: 'full-screen',
+        theme: 'light',
+        content: {
+          contentType: 'markdown',
+          data: '# Welcome to Kiosk Display\n\nWaiting for content...'
+        }
       };
       
-      ws.send(JSON.stringify(welcomeMessage));
+      ws.send(JSON.stringify(welcomeTemplate));
       
       // Handle client disconnect
       ws.on('close', () => {
@@ -50,10 +53,10 @@ export class KioskWebSocketServer {
   }
 
   // Broadcast to all connected clients
-  public broadcast(content: DisplayInput) {
-    const message = JSON.stringify(content);
+  public broadcast(template: TemplateConfig) {
+    const message = JSON.stringify(template);
     
-    console.log(`Broadcasting to ${this.clients.size} clients:`, content.type);
+    console.log(`Broadcasting to ${this.clients.size} clients:`, template.type);
     
     this.clients.forEach(client => {
       if (client.ws.readyState === client.ws.OPEN) {

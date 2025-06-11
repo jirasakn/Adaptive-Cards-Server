@@ -5,20 +5,59 @@ export interface Client {
   ws: WebSocket;
 }
 
-export interface AdaptiveCardInput {
-  type: 'adaptive-card';
-  data: any; // Adaptive Card JSON schema
+// Content Type Definitions
+export interface MarkdownContent {
+  contentType: 'markdown';
+  data: string;
+  textColor?: string;
 }
 
-export interface MarkdownInput {
-  type: 'markdown';
-  content: string;
-  backgroundColor?: string;
-  textColor?: string;
+export interface AdaptiveCardContent {
+  contentType: 'adaptive-card';
+  data: object;
+}
+
+export interface ImageContent {
+  contentType: 'image';
+  imageUrl: string;
+  displayMode: 'fit' | 'stretch' | 'cover' | 'contain' | 'center';
+  altText?: string;
+  styling?: {
+    borderColor?: string;
+    borderWidth?: number;
+    borderRadius?: number;
+    boxShadow?: string;
+  };
+}
+
+export type ContentData = MarkdownContent | AdaptiveCardContent | ImageContent;
+
+// Template Definitions
+export interface BaseTemplateConfig {
+  type: 'full-screen' | 'split-screen';
   theme?: 'light' | 'dark';
 }
 
-export type DisplayInput = AdaptiveCardInput | MarkdownInput;
+export interface FullScreenTemplateConfig extends BaseTemplateConfig {
+  type: 'full-screen';
+  content: ContentData;
+  backgroundColor?: string;
+}
+
+export interface SplitScreenTemplateConfig extends BaseTemplateConfig {
+  type: 'split-screen';
+  leftPanel: {
+    width: number; // percentage (0-100)
+    content: ContentData;
+    backgroundColor?: string;
+  };
+  rightPanel: {
+    content: ContentData;
+    backgroundColor?: string;
+  };
+}
+
+export type TemplateConfig = FullScreenTemplateConfig | SplitScreenTemplateConfig;
 
 export interface ApiResponse {
   success: boolean;
