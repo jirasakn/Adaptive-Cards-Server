@@ -8,6 +8,9 @@ import { createApiRoutes } from './apiRoutes';
 
 // Configuration
 const PORT = process.env.PORT || 3000;
+const BODY_PARSER_LIMIT = process.env.BODY_PARSER_LIMIT || '50mb';
+const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+
 const app = express();
 const server = http.createServer(app);
 
@@ -15,9 +18,11 @@ const server = http.createServer(app);
 const wsServer = new KioskWebSocketServer(server);
 
 // Configure Express middleware
-app.use(cors());
-// Increase JSON payload limit to 50MB to support base64 encoded images
-app.use(bodyParser.json({ limit: '50mb' }));
+app.use(cors({
+  origin: CORS_ORIGIN
+}));
+// Increase JSON payload limit to support base64 encoded images
+app.use(bodyParser.json({ limit: BODY_PARSER_LIMIT }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Set up API routes
